@@ -36,25 +36,25 @@ cd harara-heatwave
 <img width="304" height="613" alt="iPhone-13-PRO-MAX-localhost (4)" src="https://github.com/user-attachments/assets/b90bf538-e946-4202-8031-7b6ea843ad4a" />
 
 ## Deployment Plan
-### Phase 1 – Local Development (✅ Completed)
+### Phase 1 – Local Development ( Completed)
 
 - LSTM model trained and evaluated with high accuracy
 - FastAPI backend running locally on localhost:8000
 -Flutter app (9 fully designed pages) completed and tested with mock data
 
-### Phase 2 – API Hosting (🟡 In Progress)
+### Phase 2 – API Hosting ( In Progress)
 
 - Deploy FastAPI on Render, Railway, or Azure App Service
 - Enable CORS for Flutter–API communication
 - Automate daily model runs (07:00 UTC) for live predictions
 
-### Phase 3 – App Integration (🔜 Next)
+### Phase 3 – App Integration ( Next)
 
 - Connect Flutter app to API endpoints: /predict, /latest, /history
 - Enable real-time forecast visualization
 - Add Firebase Cloud Messaging (FCM) for push and SMS alerts
 
-### Phase 4 – Public Deployment (📅 Planned)
+### Phase 4 – Public Deployment (Planned)
 
 - Host model and API in the cloud for 24/7 access
 - Deploy app on Google Play Store and App Gallery
@@ -79,6 +79,39 @@ cd harara-heatwave
 | -------------- | -------- | --------- | ------ | -------- | ------- | ------ |
 | **Validation** | 0.87     | 0.83      | 0.96   | 0.89     | 0.927   | 0.894  |
 | **Test**       | 0.86     | 0.84      | 0.78   | 0.81     | 0.908   | 0.898  |
+
+## Folder Structure
+Harara_heat/
+│
+├── Api/                           
+│   ├── .dockerignore
+│   ├── Dockerfile                  
+│   ├── main.py                     
+│   ├── render.yaml                 
+│   └── requirements.txt            
+│
+├── harara_app/                     
+│   ├── .dart_tool/                 
+│   ├── android/                   
+│   ├── build/                      
+│   ├── ios/                        
+│   ├── lib/                        
+│   │   ├── core/theme/             
+│   │   ├── models/                 
+│   │   ├── navigation/             
+│   │   ├── routes/                 
+│   │   ├── screens/               
+│   │   ├── services/           
+│   │   ├── widgets/                
+│   │   ├── app.dart               
+│   │   └── main.dart               
+│   ├── pubspec.yaml                
+│   └── test/                       
+│
+├── .gitignore                      
+├── Heatwave_work.ipynb             
+└── README.md              
+
 
 
 ## Interpretation
