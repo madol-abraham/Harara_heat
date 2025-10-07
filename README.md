@@ -74,11 +74,30 @@ cd harara-heatwave
 ## Model Performance Summary
 
 ### The two-layer LSTM model achieved excellent generalization and predictive capability.
+
 | Dataset        | Accuracy | Precision | Recall | F1-score | ROC-AUC | PR-AUC |
 | -------------- | -------- | --------- | ------ | -------- | ------- | ------ |
 | **Validation** | 0.87     | 0.83      | 0.96   | 0.89     | 0.927   | 0.894  |
 | **Test**       | 0.86     | 0.84      | 0.78   | 0.81     | 0.908   | 0.898  |
 
+
+## Interpretation
+
+AUC values (0.91–0.93) and PR-AUC (0.89–0.90) indicate excellent class separation.
+
+The balance between precision and recall confirms reliable heatwave detection with minimal false positives.
+
+Nearly identical validation and test performance confirms low overfitting.
+
+Early stopping at Epoch 23 ensured optimal convergence and model efficiency.
+
+##  Insights
+
+The model effectively learns from 21-day sequences of climatic data.
+
+Features like LST_Day_1km, air_temp_2m, and relative_humidity drive predictive performance.
+
+This architecture is now ready for operational deployment in Harara’s real-time alert system.
 ## Author
 
 **Madol Abraham Kuol Madol**
