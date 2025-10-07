@@ -11,7 +11,7 @@ The goal is to reduce the human and economic impacts of heatwaves by providing e
 
 ## 🔗 Link to the video  
 
-[👉 [](https://youtu.be/CRM0xN97bFI)
+**Demo:** https://youtu.be/CRM0xN97bFI
 
 ---
 
