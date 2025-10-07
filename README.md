@@ -34,3 +34,53 @@ cd harara-heatwave
 <img width="304" height="613" alt="iPhone-13-PRO-MAX-localhost (3)" src="https://github.com/user-attachments/assets/830baca6-bc85-4067-a987-98d07da7d094" />
 
 <img width="304" height="613" alt="iPhone-13-PRO-MAX-localhost (4)" src="https://github.com/user-attachments/assets/b90bf538-e946-4202-8031-7b6ea843ad4a" />
+
+## Deployment Plan
+### Phase 1 – Local Development (✅ Completed)
+
+- LSTM model trained and evaluated with high accuracy
+- FastAPI backend running locally on localhost:8000
+-Flutter app (9 fully designed pages) completed and tested with mock data
+
+### Phase 2 – API Hosting (🟡 In Progress)
+
+- Deploy FastAPI on Render, Railway, or Azure App Service
+- Enable CORS for Flutter–API communication
+- Automate daily model runs (07:00 UTC) for live predictions
+
+### Phase 3 – App Integration (🔜 Next)
+
+- Connect Flutter app to API endpoints: /predict, /latest, /history
+- Enable real-time forecast visualization
+- Add Firebase Cloud Messaging (FCM) for push and SMS alerts
+
+### Phase 4 – Public Deployment (📅 Planned)
+
+- Host model and API in the cloud for 24/7 access
+- Deploy app on Google Play Store and App Gallery
+- Integrate with government meteorological data system
+
+## Project Summary
+| Component            | Framework / Tool                               |
+| -------------------- | ---------------------------------------------- |
+| **Machine Learning** | TensorFlow / Keras (LSTM), scikit-learn        |
+| **Data Source**      | Google Earth Engine (MODIS, ERA5)              |
+| **Backend**          | FastAPI, Uvicorn                               |
+| **Frontend**         | Flutter (Dart)                                 |
+| **Database**         | SQLite (local) → Firebase (planned cloud sync) |
+| **Visualization**    | Matplotlib, Seaborn                            |
+| **Deployment**       | Render / Railway / Firebase Hosting            |
+
+## Model Performance Summary
+
+### The two-layer LSTM model achieved excellent generalization and predictive capability.
+| Dataset        | Accuracy | Precision | Recall | F1-score | ROC-AUC | PR-AUC |
+| -------------- | -------- | --------- | ------ | -------- | ------- | ------ |
+| **Validation** | 0.87     | 0.83      | 0.96   | 0.89     | 0.927   | 0.894  |
+| **Test**       | 0.86     | 0.84      | 0.78   | 0.81     | 0.908   | 0.898  |
+
+## Author
+
+**Madol Abraham Kuol Madol**
+Bachelor of Software Engineering (Hons), African Leadership University — Kigali, Rwanda
+Machine Learning Engineer | AI for Climate Resilience Researcher
