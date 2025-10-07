@@ -9,7 +9,7 @@ The goal is to reduce the human and economic impacts of heatwaves by providing e
 
 ---
 
-##  Link to the video  
+##  Link to the Github repo: https://github.com/madol-abraham/Harara_heat.git  
 
 **Demo:** https://youtu.be/CRM0xN97bFI
 
