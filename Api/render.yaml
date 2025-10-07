@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: harara-api
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ARTIFACT_DIR
+        value: /app/harara_artifacts
+      - key: DB_PATH
+        value: /app/harara.db
+      - key: TIMEZONE
+        value: Africa/Kigali
+      - key: LOOKBACK_DAYS
+        value: "21"
+      - key: HORIZON_DAYS
+        value: "7"
+      - key: EE_SERVICE_ACCOUNT
+        sync: false  # Set manually in dashboard
+      - key: EE_PRIVATE_KEY_JSON
+        sync: false  # Set manually in dashboard
