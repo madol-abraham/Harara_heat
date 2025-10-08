@@ -19,7 +19,7 @@ The goal is to reduce the human and economic impacts of heatwaves by providing e
 
 ###  Clone the Repository  
 ```bash
-git clone https://github.com/your-username/harara-heatwave.git
+git clone https://github.com/madol-abraham/harara-heatwave.git
 cd harara-heatwave
 
 ```
