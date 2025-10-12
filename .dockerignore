@@ -23,9 +23,6 @@ ENV/
 *.docx
 *.xlsx
 *.csv
-*.h5
-*.pkl
-*.joblib
 *.tif
 *.zip
 data/
