@@ -129,34 +129,27 @@ EE_READY = False
 # GOOGLE EARTH ENGINE INIT
 # =============================================================================
 
+EE_READY = False  # global flag for GEE initialization
 def init_gee():
-    """
-    Initialize Earth Engine:
-    - Prefer service account + key if available
-    - Else fall back to user auth (requires 'earthengine authenticate' once)
-    """
+    """Initialize Google Earth Engine using a service account key from environment variables."""
     global EE_READY
     try:
-        # Priority 1: explicit env vars
-        if EE_SERVICE_ACCOUNT and EE_PRIVATE_KEY_JSON_PATH and os.path.exists(EE_PRIVATE_KEY_JSON_PATH):
-            creds = ee.ServiceAccountCredentials(EE_SERVICE_ACCOUNT, EE_PRIVATE_KEY_JSON_PATH)
-            ee.Initialize(creds)
-            print(" Earth Engine initialized (env service account)")
-        # Priority 2: local quickstart pair (handy for local dev)
-        elif os.path.exists(LOCAL_EE_KEY_FILE):
-            creds = ee.ServiceAccountCredentials(LOCAL_EE_SERVICE_ACCOUNT, LOCAL_EE_KEY_FILE)
-            ee.Initialize(creds)
-            print(" Earth Engine initialized (local service account)")
-        # Priority 3: user auth cache (earthengine authenticate)
-        else:
-            ee.Initialize()
-            print(" Earth Engine initialized (user credentials)")
+        key_json = os.getenv("EE_SERVICE_KEY")
+        if not key_json:
+            raise ValueError("Missing EE_SERVICE_KEY environment variable")
+
+        # Parse JSON string from environment
+        service_account_info = json.loads(key_json)
+        credentials = ee.ServiceAccountCredentials(
+            service_account_info["client_email"],
+            key_data=key_json
+        )
+        ee.Initialize(credentials)
         EE_READY = True
+        print("✅ Earth Engine initialized using Render service account key")
     except Exception as e:
         EE_READY = False
-        print(f" EE init error: {e}")
-        raise
-
+        print(f"❌ EE init error: {e}")
 def build_ee_objects():
     """Create EE ImageCollections and town geometries AFTER init."""
     global era5, modis_lst, modis_ndvi, towns
