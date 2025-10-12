@@ -1,12 +1,18 @@
+# =====================================================================
+# Python cache & environments
+# =====================================================================
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
 env/
 venv/
 .venv/
 ENV/
+
+# =====================================================================
+# Logs, cache, coverage, and editor files
+# =====================================================================
 *.log
 .cache/
 .tox/
@@ -18,18 +24,33 @@ ENV/
 .vscode/
 .idea/
 .DS_Store
-*.ipynb
-*.pdf
-*.docx
-*.xlsx
-*.csv
-*.tif
-*.zip
+
+# =====================================================================
+# Datasets & local data not needed in production
+# =====================================================================
 data/
 datasets/
 ee_cache/
 gee_data/
+
+# =====================================================================
+# Version control & environment secrets
+# =====================================================================
 .git/
 .gitignore
 .env
 .env.*
+
+# =====================================================================
+# Model and artifact control
+# =====================================================================
+*.h5
+*.pkl
+*.joblib
+*.keras
+# Allow only the production-ready models
+!harara_artifacts/
+!harara_artifacts/model.keras
+!harara_artifacts/best_model.keras
+!harara_artifacts/scaler.pkl
+!harara_artifacts/threshold.json
