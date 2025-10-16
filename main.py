@@ -40,13 +40,23 @@ def init_firestore():
     """Initialize Firebase Firestore using service account key."""
     global FIRESTORE_DB
     try:
-        cred_path = os.path.join(os.path.dirname(__file__), "firebase-key.json")
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred)
-        FIRESTORE_DB = firestore.client()
-        print(" Firestore initialized successfully")
+        # Try environment variable first (for cloud deployment)
+        firebase_key = os.getenv("FIREBASE_SERVICE_KEY")
+        if firebase_key:
+            firebase_info = json.loads(firebase_key)
+            cred = credentials.Certificate(firebase_info)
+            firebase_admin.initialize_app(cred)
+            FIRESTORE_DB = firestore.client()
+            print("✅ Firestore initialized with environment service account key")
+        else:
+            # Fallback to local file (for local development)
+            cred_path = os.path.join(os.path.dirname(__file__), "firebase-key.json")
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+            FIRESTORE_DB = firestore.client()
+            print("✅ Firestore initialized with local key file")
     except Exception as e:
-        print(f" Firestore init error: {e}")
+        print(f"❌ Firestore init error: {e}")
 
 # =============================================================================
 # CONFIG / CONSTANTS
@@ -136,21 +146,31 @@ def init_gee():
     """Initialize Google Earth Engine."""
     global EE_READY
     try:
-        if EE_SERVICE_ACCOUNT and EE_PRIVATE_KEY_JSON_PATH:
-            credentials = ee.ServiceAccountCredentials(EE_SERVICE_ACCOUNT, EE_PRIVATE_KEY_JSON_PATH)
+        # Try environment variable first (for cloud deployment)
+        key_json = os.getenv("EE_SERVICE_KEY")
+        if key_json:
+            service_account_info = json.loads(key_json)
+            credentials = ee.ServiceAccountCredentials(
+                service_account_info["client_email"],
+                key_data=key_json
+            )
             ee.Initialize(credentials)
-            print(" EE initialized with environment vars")
+            EE_READY = True
+            print("✅ EE initialized with environment service account key")
+        # Fallback to local file (for local development)
         elif os.path.exists(LOCAL_EE_KEY_FILE):
             credentials = ee.ServiceAccountCredentials(LOCAL_EE_SERVICE_ACCOUNT, LOCAL_EE_KEY_FILE)
             ee.Initialize(credentials)
-            print(" EE initialized with local key file")
+            EE_READY = True
+            print("✅ EE initialized with local key file")
         else:
+            # Last resort: default authentication
             ee.Initialize()
-            print(" EE initialized with default credentials")
-        EE_READY = True
+            EE_READY = True
+            print("✅ EE initialized with default credentials")
     except Exception as e:
         EE_READY = False
-        print(f" EE init error: {e}")
+        print(f"❌ EE init error: {e}")
 
 def build_ee_objects():
     """Create EE ImageCollections and town geometries."""
