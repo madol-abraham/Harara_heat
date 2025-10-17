@@ -391,12 +391,29 @@ def prepare_window(df_recent: pd.DataFrame) -> np.ndarray:
     if len(arr) < LOOKBACK_DAYS:
         pad_len = LOOKBACK_DAYS - len(arr)
         arr = np.vstack([np.zeros((pad_len, arr.shape[1])), arr])
+    
+    # Handle NaN values
+    if np.isnan(arr).any():
+        arr = np.nan_to_num(arr, nan=0.0)
+    
     arr_scaled = SCALER.transform(arr)
     return arr_scaled.reshape(1, LOOKBACK_DAYS, len(FEATURE_COLS))
 
 def predict_one_town(tname: str, df_recent: pd.DataFrame) -> Dict:
     X = prepare_window(df_recent)
+    
+    # Check for NaN in input
+    if np.isnan(X).any():
+        print(f"⚠️ NaN detected in input for {tname}")
+        return {"town": tname, "probability": 0.0, "alert": 0}
+    
     prob = float(MODEL.predict(X, verbose=0).ravel()[0])
+    
+    # Check for NaN in prediction
+    if np.isnan(prob):
+        print(f"⚠️ Model returned NaN for {tname}")
+        prob = 0.0
+    
     alert = int(prob >= THRESHOLD)
     return {"town": tname, "probability": prob, "alert": alert}
 
