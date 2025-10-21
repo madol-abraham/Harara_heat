@@ -11,4 +11,6 @@ earthengine-api==0.1.384
 python-dotenv==1.0.0
 scikit-learn==1.4.1.post1
 firebase-admin
+twilio==8.10.0
+africastalking==1.2.5
 

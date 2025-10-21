@@ -27,54 +27,6 @@ from sqlmodel import SQLModel, Field, create_engine, Session, select
 import tensorflow as tf
 import joblib
 import ee
-from dotenv import load_dotenv
-load_dotenv()  # Load .env variables
-
-# =============================================================================
-# AFRICA'S TALKING SMS SETUP
-# =============================================================================
-import africastalking
-
-AT_USERNAME = os.getenv("AT_USERNAME", "sandbox")
-AT_API_KEY = os.getenv("AT_API_KEY")
-
-try:
-    africastalking.initialize(AT_USERNAME, AT_API_KEY)
-    sms = africastalking.SMS
-    print("✅ Africa's Talking initialized successfully")
-except Exception as e:
-    print(f"❌ Africa's Talking init error: {e}")
-
-def send_sms_africa(phone_number: str, message: str):
-    """Send SMS with fallback options"""
-    # Method 1: Try Africa's Talking (if working)
-    try:
-        response = sms.send(message, [phone_number])
-        print(f"🔍 Africa's Talking Response: {response}")
-        
-        # Check if SMS was actually sent successfully
-        if 'SMSMessageData' in response and 'Recipients' in response['SMSMessageData']:
-            recipients = response['SMSMessageData']['Recipients']
-            if recipients and len(recipients) > 0:
-                status = recipients[0].get('status', 'Unknown')
-                cost = recipients[0].get('cost', 'Unknown')
-                print(f"📊 SMS Status: {status}, Cost: {cost}")
-                if 'Success' in status:
-                    print(f"✅ SMS sent successfully to {phone_number}")
-                    return {"status": "sent", "provider": "africastalking", "response": response}
-                else:
-                    print(f"❌ SMS failed with status: {status}")
-            else:
-                print(f"❌ No recipients in response")
-        else:
-            print(f"❌ Invalid response format: {response}")
-            
-    except Exception as e:
-        print(f"❌ Africa's Talking failed: {e}")
-    
-    # Method 2: Simulation mode (for testing)
-    print(f"📱 SMS SIMULATION: Would send to {phone_number}: {message[:50]}...")
-    return {"status": "simulated", "provider": "simulation", "message": "SMS simulated successfully"}
 
 # =============================================================================
 # FIREBASE FIRESTORE SETUP
@@ -218,7 +170,7 @@ def init_gee():
             print("✅ EE initialized with default credentials")
     except Exception as e:
         EE_READY = False
-        print(f" EE init error: {e}")
+        print(f"❌ EE init error: {e}")
 
 def build_ee_objects():
     """Create EE ImageCollections and town geometries."""
@@ -410,8 +362,8 @@ def upload_predictions_to_firestore(result):
         alert_flag = bool(p["alert"])
         severity = "High" if prob >= 0.75 else "Moderate" if prob >= 0.45 else "None"
         message = (
-            f"HARARA ALERT: High heatwave risk expected in {town}. Stay hydrated and seek shade during peak hours." if alert_flag
-            else f"HARARA UPDATE: No heatwave expected - conditions normal in {town}."
+            f" High heatwave risk expected in {town}." if alert_flag
+            else f"No heatwave expected — conditions normal in {town}."
         )
 
         doc_data = {
@@ -452,14 +404,14 @@ def predict_one_town(tname: str, df_recent: pd.DataFrame) -> Dict:
     
     # Check for NaN in input
     if np.isnan(X).any():
-        print(f" NaN detected in input for {tname}")
+        print(f"⚠️ NaN detected in input for {tname}")
         return {"town": tname, "probability": 0.0, "alert": 0}
     
     prob = float(MODEL.predict(X, verbose=0).ravel()[0])
     
     # Check for NaN in prediction
     if np.isnan(prob):
-        print(f" Model returned NaN for {tname}")
+        print(f"⚠️ Model returned NaN for {tname}")
         prob = 0.0
     
     alert = int(prob >= THRESHOLD)
@@ -531,11 +483,6 @@ class PredictResponse(BaseModel):
     end_date: str
     threshold: float
     predictions: List[Dict]
-
-class ManualAlertRequest(BaseModel):
-    town: str
-    message: str
-    severity: str = "High"
 
 @app.get("/health")
 def health():
@@ -685,179 +632,6 @@ def firestore_prediction_history(days: int = 7):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# =============================================================================
-# SMS ALERT ENDPOINTS
-# =============================================================================
-
-@app.post("/alerts/manual")
-def send_manual_alert(request: ManualAlertRequest):
-    """
-    Manual alert endpoint for dashboard to send custom alerts.
-    Creates new alert in Firestore + sends SMS.
-    """
-    try:
-        if FIRESTORE_DB is None:
-            raise HTTPException(status_code=500, detail="Firestore not initialized")
-        
-        if request.town not in ["Juba", "Wau", "Yambio", "Bor", "Malakal", "Bentiu"]:
-            raise HTTPException(status_code=400, detail="Invalid town")
-        
-        # Create new alert document in Firestore
-        alert_data = {
-            "town": request.town,
-            "message": request.message,
-            "severity": request.severity,
-            "probability": 0.85 if request.severity == "High" else 0.65,
-            "alert": True,
-            "date": dt.datetime.now(ZoneInfo(TIMEZONE)).strftime("%Y-%m-%d"),
-            "timestamp": dt.datetime.now(ZoneInfo(TIMEZONE)),
-        }
-        
-        # Add to Firestore alerts collection (Flutter app will receive this)
-        FIRESTORE_DB.collection("alerts").add(alert_data)
-        
-        # Send SMS to registered users
-        recipients = []
-        try:
-            users = FIRESTORE_DB.collection("users").where(filter=firestore.FieldFilter("town", "==", request.town)).where(filter=firestore.FieldFilter("active", "==", True)).stream()
-            recipients = [user.to_dict().get("phone_number") for user in users if user.to_dict().get("phone_number")]
-        except Exception as e:
-            print(f" Error fetching users: {e}")
-        
-        if not recipients:
-            recipients = ["+250792403010"]
-            print(" No registered users found, using fallback number")
-        
-        for phone in recipients:
-            if phone and not phone.startswith('+'):
-                if phone.startswith('0'):
-                    phone = '+250' + phone[1:]
-                else:
-                    phone = '+250' + phone
-            
-            send_sms_africa(phone, request.message)
-            print(f"📱 SMS sent to: {phone}")
-        
-        return {
-            "status": "success",
-            "message": "Manual alert sent successfully",
-            "town": request.town,
-            "recipients_count": len(recipients),
-            "alert_data": alert_data
-        }
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/alerts/trigger-demo")
-def trigger_demo_alert():
-    """
-    🔥 Demo endpoint to simulate real-time alert notifications.
-    It fetches the latest alert from Firestore and sends SMS via Africa's Talking.
-    """
-    try:
-        if FIRESTORE_DB is None:
-            raise HTTPException(status_code=500, detail="Firestore not initialized")
-
-        alerts_ref = (
-            FIRESTORE_DB.collection("alerts")
-            .order_by("timestamp", direction=firestore.Query.DESCENDING)
-            .limit(1)
-        )
-        docs = list(alerts_ref.stream())
-
-        if not docs:
-            return {"message": "No alerts found in Firestore."}
-
-        latest_alert = docs[0].to_dict()
-        town = latest_alert.get("town")
-        message = latest_alert.get("message")
-        severity = latest_alert.get("severity")
-        probability = latest_alert.get("probability")
-
-        print(f" Triggering demo alert for {town}")
-
-        #  Send SMS via Africa's Talking
-        # Get registered users for this town from Firestore
-        recipients = []
-        try:
-            users = FIRESTORE_DB.collection("users").where(filter=firestore.FieldFilter("town", "==", town)).where(filter=firestore.FieldFilter("active", "==", True)).stream()
-            recipients = [user.to_dict().get("phone_number") for user in users if user.to_dict().get("phone_number")]
-        except Exception as e:
-            print(f" Error fetching users: {e}")
-        
-        # Fallback to test number if no users registered
-        if not recipients:
-            recipients = ["+250792403010"]  # Fallback for testing
-            print(" No registered users found, using fallback number")
-        
-        for phone in recipients:
-            # Ensure phone number has proper international format
-            if phone and not phone.startswith('+'):
-                if phone.startswith('0'):
-                    phone = '+250' + phone[1:]  #
-                else:
-                    phone = '+250' + phone
-            
-            professional_message = f"HARARA ALERT: Elevated heatwave conditions forecasted for {town} area. Please stay hydrated, seek shade during peak hours (10AM-4PM), and check on vulnerable community members. Risk level: {probability:.0%}. Stay safe."
-            send_sms_africa(phone, professional_message)
-            print(f" SMS sent to: {phone}")
-
-        print(" Demo SMS sent successfully")
-
-        return {
-            "status": "ok",
-            "town": town,
-            "message": message,
-            "severity": severity,
-            "probability": probability,
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/users/register")
-def register_user(phone: str, town: str, name: str = ""):
-    """Register a user for SMS alerts"""
-    try:
-        if not FIRESTORE_DB:
-            raise HTTPException(500, "Firestore not initialized")
-        
-        if town not in ["Juba", "Wau", "Yambio", "Bor", "Malakal", "Bentiu"]:
-            raise HTTPException(400, "Invalid town")
-        
-        user_data = {
-            "phone_number": phone,
-            "town": town,
-            "name": name,
-            "active": True,
-            "created_at": firestore.SERVER_TIMESTAMP
-        }
-        
-        FIRESTORE_DB.collection("users").add(user_data)
-        return {"success": True, "message": f"User registered for {town} alerts"}
-    
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-@app.get("/users/town/{town}")
-def get_town_users(town: str):
-    """Get registered users for a town"""
-    try:
-        if not FIRESTORE_DB:
-            raise HTTPException(500, "Firestore not initialized")
-        
-        users = FIRESTORE_DB.collection("users").where(filter=firestore.FieldFilter("town", "==", town)).where(filter=firestore.FieldFilter("active", "==", True)).stream()
-        user_list = [user.to_dict() for user in users]
-        
-        return {"town": town, "count": len(user_list), "users": user_list}
-    
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-# =============================================================================
-# SCHEDULER
-# =============================================================================
 
 def scheduled_job():
     try:
