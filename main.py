@@ -183,29 +183,25 @@ modis_ndvi = None
 towns: Dict[str, ee.Geometry] = {}
 
 def init_gee():
+    """Initialize Google Earth Engine using EE_SERVICE_KEY from environment (Render-safe)."""
     global EE_READY
     try:
-        # Try environment variables first (for Render deployment)
-        if EE_SERVICE_ACCOUNT and EE_SERVICE_KEY:
-            service_key_info = json.loads(EE_SERVICE_KEY)
-            credentials = ee.ServiceAccountCredentials(EE_SERVICE_ACCOUNT, key_data=service_key_info)
-            ee.Initialize(credentials)
-            EE_READY = True
-            print("✅ EE initialized with environment variables")
-        # Fallback to local file (for local development)
-        elif os.path.exists(LOCAL_EE_KEY_FILE):
-            credentials = ee.ServiceAccountCredentials(LOCAL_EE_SERVICE_ACCOUNT, LOCAL_EE_KEY_FILE)
-            ee.Initialize(credentials)
-            EE_READY = True
-            print("✅ EE initialized with local key file")
-        # Last resort: default credentials
-        else:
-            ee.Initialize()
-            EE_READY = True
-            print("✅ EE initialized with default credentials")
+        key_json = os.getenv("EE_SERVICE_KEY")
+        if not key_json:
+            raise ValueError("Missing EE_SERVICE_KEY environment variable")
+
+        service_account_info = json.loads(key_json)
+        credentials = ee.ServiceAccountCredentials(
+            service_account_info["client_email"],
+            key_data=key_json
+        )
+        ee.Initialize(credentials)
+        EE_READY = True
+        print("✅ EE initialized with environment service key")
     except Exception as e:
         EE_READY = False
-        print(f"❌ EE init error: {e}")
+        print(f"❌ EE initialization failed: {e}")
+        print("⚠️ Google Earth Engine not ready — check EE_SERVICE_KEY formatting in Render dashboard.")
 
 def build_ee_objects():
     global era5, modis_lst, modis_ndvi, towns
