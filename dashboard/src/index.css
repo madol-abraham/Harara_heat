@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #1B4332;
+  --primary-light: #2D5A47;
+  --secondary: #40916C;
+  --accent: #52B788;
+  --background: #FFFFFF;
+  --surface: #F8F9FA;
+  --text: #1B4332;
+  --text-secondary: #6C757D;
+  --success: #22C55E;
+  --warning: #EAB308;
+  --error: #EF4444;
+  --info: #84CC16;
+  --border: #E9ECEF;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.leaflet-container {
+  height: 400px;
+  width: 100%;
+}
