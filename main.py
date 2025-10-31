@@ -185,11 +185,20 @@ towns: Dict[str, ee.Geometry] = {}
 def init_gee():
     global EE_READY
     try:
-        if os.path.exists(LOCAL_EE_KEY_FILE):
+        # Try environment variables first (for Render deployment)
+        if EE_SERVICE_ACCOUNT and EE_PRIVATE_KEY_JSON_PATH:
+            service_key_info = json.loads(EE_PRIVATE_KEY_JSON_PATH)
+            credentials = ee.ServiceAccountCredentials(EE_SERVICE_ACCOUNT, key_data=service_key_info)
+            ee.Initialize(credentials)
+            EE_READY = True
+            print("✅ EE initialized with environment variables")
+        # Fallback to local file (for local development)
+        elif os.path.exists(LOCAL_EE_KEY_FILE):
             credentials = ee.ServiceAccountCredentials(LOCAL_EE_SERVICE_ACCOUNT, LOCAL_EE_KEY_FILE)
             ee.Initialize(credentials)
             EE_READY = True
             print("✅ EE initialized with local key file")
+        # Last resort: default credentials
         else:
             ee.Initialize()
             EE_READY = True
