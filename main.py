@@ -134,7 +134,7 @@ FEATURE_COLS = [
     "soil_moisture", "wind_speed", "longitude", "latitude"
 ]
 EE_SERVICE_ACCOUNT = os.getenv("EE_SERVICE_ACCOUNT")
-EE_PRIVATE_KEY_JSON_PATH = os.getenv("EE_PRIVATE_KEY_JSON_PATH")
+EE_SERVICE_KEY = os.getenv("EE_SERVICE_KEY")
 LOCAL_EE_SERVICE_ACCOUNT = "harara-service@south-sudan-heatwave.iam.gserviceaccount.com"
 LOCAL_EE_KEY_FILE = "south-sudan-heatwave-583da500ae5f.json"
 
@@ -186,8 +186,8 @@ def init_gee():
     global EE_READY
     try:
         # Try environment variables first (for Render deployment)
-        if EE_SERVICE_ACCOUNT and EE_PRIVATE_KEY_JSON_PATH:
-            service_key_info = json.loads(EE_PRIVATE_KEY_JSON_PATH)
+        if EE_SERVICE_ACCOUNT and EE_SERVICE_KEY:
+            service_key_info = json.loads(EE_SERVICE_KEY)
             credentials = ee.ServiceAccountCredentials(EE_SERVICE_ACCOUNT, key_data=service_key_info)
             ee.Initialize(credentials)
             EE_READY = True
