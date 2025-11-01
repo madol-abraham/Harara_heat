@@ -67,7 +67,7 @@ const Layout = ({ children, onLogout }) => {
                   <p className="text-white opacity-90 text-sm font-medium">Real-time Heatwave Monitoring & Early Warning System</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-white opacity-75 text-xs">Republic of South Sudan</p>
+                  <p className="text-white opacity-75 text-xs">Harara</p>
                   <p className="text-white text-sm font-semibold">Climate Resilience Initiative</p>
                 </div>
               </div>

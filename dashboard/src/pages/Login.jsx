@@ -29,7 +29,7 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)'}}>
+    <div className="min-h-screen flex items-center justify-center" style={{backgroundColor: 'white'}}>
       <div className="max-w-md w-full space-y-8 p-8 rounded-lg shadow-2xl" style={{backgroundColor: 'var(--background)', border: '1px solid var(--border)'}}>
         <div className="text-center">
           <div className="mb-4">
@@ -97,7 +97,7 @@ const Login = ({ onLogin }) => {
         </form>
         
         <div className="text-center text-sm" style={{color: 'var(--text-secondary)'}}>
-          Default credentials: admin / harara123
+          welcome the admin dashboard: manage users, monitor heatwaves, and ensure timely alerts for South Sudan.
         </div>
       </div>
     </div>
