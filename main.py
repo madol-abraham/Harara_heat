@@ -1,5 +1,5 @@
 # =============================================================================
-# Harara Heatwave API (Production Ready)
+# Harara Heatwave API 
 # - Loads trained artifacts (scaler, model, threshold)
 # - Pulls features from Google Earth Engine
 # - Produces 7-day heatwave risk per town
@@ -44,9 +44,9 @@ AT_API_KEY = os.getenv("AT_API_KEY")
 try:
     africastalking.initialize(AT_USERNAME, AT_API_KEY)
     sms = africastalking.SMS
-    print("✅ Africa's Talking initialized successfully")
+    print("Africa's Talking initialized successfully")
 except Exception as e:
-    print(f"❌ Africa's Talking init error: {e}")
+    print(f" Africa's Talking init error: {e}")
 
 def send_sms_africa(phone_number: str, message: str):
     """Send SMS with fallback options"""
@@ -61,22 +61,22 @@ def send_sms_africa(phone_number: str, message: str):
             if recipients and len(recipients) > 0:
                 status = recipients[0].get('status', 'Unknown')
                 cost = recipients[0].get('cost', 'Unknown')
-                print(f"📊 SMS Status: {status}, Cost: {cost}")
+                print(f" SMS Status: {status}, Cost: {cost}")
                 if 'Success' in status:
-                    print(f"✅ SMS sent successfully to {phone_number}")
+                    print(f" SMS sent successfully to {phone_number}")
                     return {"status": "sent", "provider": "africastalking", "response": response}
                 else:
-                    print(f"❌ SMS failed with status: {status}")
+                    print(f" SMS failed with status: {status}")
             else:
-                print(f"❌ No recipients in response")
+                print(f" No recipients in response")
         else:
-            print(f"❌ Invalid response format: {response}")
+            print(f" Invalid response format: {response}")
             
     except Exception as e:
-        print(f"❌ Africa's Talking failed: {e}")
+        print(f" Africa's Talking failed: {e}")
     
     # Method 2: Simulation mode (for testing)
-    print(f"📱 SMS SIMULATION: Would send to {phone_number}: {message[:50]}...")
+    print(f" SMS SIMULATION: Would send to {phone_number}: {message[:50]}...")
     return {"status": "simulated", "provider": "simulation", "message": "SMS simulated successfully"}
 
 # =============================================================================
@@ -95,7 +95,7 @@ def init_firestore():
         if firebase_admin._apps:
             # App already exists, just get client
             FIRESTORE_DB = firestore.client()
-            print("✅ Firestore client retrieved from existing app")
+            print(" Firestore client retrieved from existing app")
             return
             
         firebase_key = os.getenv("FIREBASE_SERVICE_KEY")
@@ -104,15 +104,15 @@ def init_firestore():
             cred = credentials.Certificate(firebase_info)
             firebase_admin.initialize_app(cred)
             FIRESTORE_DB = firestore.client()
-            print("✅ Firestore initialized with env service key")
+            print(" Firestore initialized with env service key")
         else:
             cred_path = os.path.join(os.path.dirname(__file__), "firebase-key.json")
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred)
             FIRESTORE_DB = firestore.client()
-            print("✅ Firestore initialized with local key")
+            print(" Firestore initialized with local key")
     except Exception as e:
-        print(f"❌ Firestore init error: {e}")
+        print(f" Firestore init error: {e}")
 
 # =============================================================================
 # CONFIG
@@ -197,13 +197,14 @@ def init_gee():
         )
         ee.Initialize(credentials)
         EE_READY = True
-        print("✅ EE initialized with environment service key")
+        print(" EE initialized with environment service key")
     except Exception as e:
         EE_READY = False
-        print(f"❌ EE initialization failed: {e}")
-        print("⚠️ Google Earth Engine not ready — check EE_SERVICE_KEY formatting in Render dashboard.")
+        print(f" EE initialization failed: {e}")
+        print(" Google Earth Engine not ready — check EE_SERVICE_KEY formatting in Render dashboard.")
 
 def build_ee_objects():
+    
     global era5, modis_lst, modis_ndvi, towns
     if not EE_READY:
         raise RuntimeError("EE not initialized")
@@ -280,8 +281,7 @@ def _ensure_daily_index(df, start, end):
     return df.reset_index()
 
 # =============================================================================
-# MISSING ENDPOINTS FROM DUPLICATE.PY
-# =============================================================================
+
 
 # Add missing imports
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -434,7 +434,7 @@ def upload_predictions_to_firestore(result):
         town = p["town"]
         prob = float(p["probability"])
         alert_flag = bool(p["alert"])
-        severity = "High" if prob >= 0.75 else "Moderate" if prob >= 0.45 else "None"
+        severity = "High" if prob >= 0.85 else "Moderate" if prob >= 0.75 else "None"
         message = (
             f"HARARA ALERT: High heatwave risk expected in {town}. Stay hydrated and seek shade during peak hours." if alert_flag
             else f"HARARA UPDATE: No heatwave expected - conditions normal in {town}."
@@ -704,7 +704,7 @@ def send_manual_alert(request: ManualAlertRequest):
             "town": request.town,
             "message": request.message,
             "severity": request.severity,
-            "probability": 0.85 if request.severity == "High" else 0.65,
+            "probability": 0.85 if request.severity == "High" else 0.67,
             "alert": True,
             "date": dt.datetime.now(ZoneInfo(TIMEZONE)).strftime("%Y-%m-%d"),
             "timestamp": dt.datetime.now(ZoneInfo(TIMEZONE)),
@@ -1138,7 +1138,7 @@ def upload_predictions_to_firestore(result):
     date_str = dt.datetime.now(ZoneInfo(TIMEZONE)).strftime("%Y-%m-%d")
     for p in result["predictions"]:
         town = p["town"]; prob = float(p["probability"]); alert_flag = bool(p["alert"])
-        severity = "High" if prob >= 0.75 else "Moderate" if prob >= 0.45 else "None"
+        severity = "High" if prob >= 0.75 else "Moderate" if prob >= 0.70 else "None"
         message = (
             f"HARARA ALERT: High heatwave risk in {town}." if alert_flag
             else f"HARARA UPDATE: Normal conditions in {town}."
