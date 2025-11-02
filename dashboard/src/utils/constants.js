@@ -16,6 +16,6 @@ export const SEVERITY_COLORS = {
 
 export const RISK_LEVELS = {
   HIGH: { min: 0.75, color: '#ef4444', label: 'High Risk' },
-  MODERATE: { min: 0.70, color: '#f59e0b', label: 'Moderate Risk' },
+  MODERATE: { min: 0.67, color: '#f59e0b', label: 'Moderate Risk' },
   LOW: { min: 0.0, color: '#10b981', label: 'Low Risk' },
 };

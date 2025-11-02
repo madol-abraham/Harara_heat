@@ -223,11 +223,11 @@ const Dashboard = () => {
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
                       prediction.probability >= 0.75 ? 'bg-red-500 text-white' :
-                      prediction.probability >= 0.45 ? 'bg-yellow-500 text-white' :
+                      prediction.probability >= 0.67 ? 'bg-yellow-500 text-white' :
                       'bg-green-500 text-white'
                     }`}>
                       {prediction.probability >= 0.75 ? 'High' :
-                       prediction.probability >= 0.45 ? 'Moderate' : 'Low'}
+                       prediction.probability >= 0.67 ? 'Moderate' : 'Low'}
                     </span>
                   </td>
                   <td className="py-3 px-4">
